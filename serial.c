@@ -40,7 +40,7 @@ int amount_neighbours(data * conways_data, int x, int y) {
 	return amount;
 }
 
-void operate(data * conways_data) {
+void operate(data * conways_data, int number_threads) {
 	int i, j, amount;
 	for(i = 0; i < conways_data->height; i++) {
 		for(j = 0; j < conways_data->width; j++) {
@@ -66,10 +66,10 @@ void operate(data * conways_data) {
 	return;
 }
 
-void run_n_times(data * conways_data, int iterations) {
+void run_n_times(data * conways_data, int iterations, int number_threads) {
     int i;
 	for(i = 0; i < iterations; i++)
-		operate(conways_data);
+		operate(conways_data, number_threads);
     return;
 }
 
@@ -85,9 +85,9 @@ void print_data(data * conways_data) {
 }
 
 int main(void) {
-	int w, h, seed;
+	int w, h, number_threads, seed;
 	data conways_data;
-	scanf(" %d %d", &w, &h);
+	scanf(" %d %d %d", &w, &h, &number_threads);
 	conways_data.width = w;
 	conways_data.height = h;
 	conways_data.values = (char *) malloc(sizeof(char) * w * h);
@@ -114,7 +114,7 @@ int main(void) {
 
     double start, end;
     start = rtclock();
-	run_n_times(&conways_data, iterations);
+	run_n_times(&conways_data, iterations, number_threads);
 	end = rtclock();
 
 	print_data(&conways_data);
