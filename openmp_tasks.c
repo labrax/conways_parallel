@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <assert.h>
+#include <omp.h>
 
 #define SEED
 
@@ -24,18 +25,28 @@ double rtclock() {
 int amount_neighbours(data * conways_data, int x, int y) {
 	int i, j;
 	int amount = 0;
-	for(i = y-1; i <= y+1; i++) {
-		for(j = x-1; j <= x+1; j++) {
-			//printf("%d %d -- %c\n", j, i, conways_data->values[i*conways_data->width+j]);
-			if(i == y && j == x)
-				continue;
-			if(i >= 0 && i < conways_data->height
-					&& j >= 0 && j < conways_data->width
-					&& conways_data->values[i*conways_data->width+j] == '1') {
-				amount++;
+
+	#pragma omp parallel
+	{
+		#pragma omp single
+		{
+			for(i = y-1; i <= y+1; i++) {
+				for(j = x-1; j <= x+1; j++) {
+					//printf("%d %d -- %c\n", j, i, conways_data->values[i*conways_data->width+j]);
+					#pragma omp task firstprivate(i, j, x, y)
+					{
+						if((i != y || j != x) && i >= 0 && i < conways_data->height
+								&& j >= 0 && j < conways_data->width
+								&& conways_data->values[i*conways_data->width+j] == '1') {
+							#pragma omp critical
+							amount++;
+						}
+					}
+				}
 			}
 		}
 	}
+
 	assert(amount >= 0 && amount <= 8);
 	return amount;
 }

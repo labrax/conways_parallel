@@ -1,8 +1,8 @@
 CC = gcc
 CUDA_CC = nvcc
 
-DEBUG_FLAGS = -Wall -lm -g
-RELEASE_FLAGS = -Wall -lm -O3
+DEBUG_FLAGS = -Wall -Wextra -lm -g
+RELEASE_FLAGS = -Wall -Wextra -lm -O3
 FLAGS = $(DEBUG_FLAGS)
 
 OPENMP_FLAGS = -fopenmp
@@ -17,8 +17,8 @@ serial: serial.c
 openmp: openmp.c
 	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp.c -o openmp.out
 
-openmp_taks: openmp_tasks.c
-	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp-tasks.c -o openmp_tasks.out
+openmp_tasks: openmp_tasks.c
+	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp_tasks.c -o openmp_tasks.out
 
 pthreads:
 	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads.out
