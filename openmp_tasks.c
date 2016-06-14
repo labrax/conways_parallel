@@ -25,49 +25,52 @@ double rtclock() {
 int amount_neighbours(data * conways_data, int x, int y) {
 	int i, j;
 	int amount = 0;
-    for(i = y-1; i <= y+1; i++) {
-        for(j = x-1; j <= x+1; j++) {
-            //printf("%d %d -- %c\n", j, i, conways_data->values[i*conways_data->width+j]);
-            if((i != y || j != x) && i >= 0 && i < conways_data->height
-                    && j >= 0 && j < conways_data->width
-                    && conways_data->values[i*conways_data->width+j] == '1') {
-            }
-        }
-    }
+	for(i = y-1; i <= y+1; i++) {
+		for(j = x-1; j <= x+1; j++) {
+			//printf("%d %d -- %c\n", j, i, conways_data->values[i*conways_data->width+j]);
+			if(i == y && j == x)
+				continue;
+			if(i >= 0 && i < conways_data->height
+					&& j >= 0 && j < conways_data->width
+					&& conways_data->values[i*conways_data->width+j] == '1') {
+				amount++;
+			}
+		}
+	}
 	assert(amount >= 0 && amount <= 8);
 	return amount;
 }
 
 void operate(data * conways_data, int number_threads) {
 	int i, j, amount;
-    
+
     omp_set_num_threads(number_threads);
-    #pragma omp parallel
+	#pragma omp parallel
 	{
 		#pragma omp single
 		{
-            for(i = 0; i < conways_data->height; i++) {
-                for(j = 0; j < conways_data->width; j++) {
-                    #pragma omp task firstprivate(i, j)
-                    {
-                        amount = amount_neighbours(conways_data, j, i);
-                        if(conways_data->values[i*conways_data->width+j] == '1') {
-                            if(amount < 2 || amount > 3)
-                                conways_data->next_values[i*conways_data->width+j] = '0';
-                            else
-                                conways_data->next_values[i*conways_data->width+j] = '1';
-                        }
-                        else {
-                            if(amount == 3)
-                                conways_data->next_values[i*conways_data->width+j] = '1';
-                            else
-                                conways_data->next_values[i*conways_data->width+j] = '0';
-                        }
-                    }
-                }
-            }
-		}
-	}
+			for(i = 0; i < conways_data->height; i++) {
+				#pragma omp task firstprivate(i,j) private(amount)
+				{
+					for(j = 0; j < conways_data->width; j++) {
+						amount = amount_neighbours(conways_data, j, i);
+						if(conways_data->values[i*conways_data->width+j] == '1') {
+							if(amount < 2 || amount > 3)
+								conways_data->next_values[i*conways_data->width+j] = '0';
+							else
+								conways_data->next_values[i*conways_data->width+j] = '1';
+						}
+						else {
+							if(amount == 3)
+								conways_data->next_values[i*conways_data->width+j] = '1';
+							else
+								conways_data->next_values[i*conways_data->width+j] = '0';
+						}
+					}
+				}
+			}
+        }
+    }
 
 	char * temp = conways_data->values; //swap buffers
 	conways_data->values = conways_data->next_values;
