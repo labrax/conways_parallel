@@ -42,6 +42,12 @@ int amount_neighbours(data * conways_data, int x, int y) {
 
 void operate(data * conways_data, int number_threads) {
 	int i, j, amount;
+
+	if(number_threads < 1) {
+		printf("Invalid thread number\n");
+		exit(1);
+	}
+
 	for(i = 0; i < conways_data->height; i++) {
 		for(j = 0; j < conways_data->width; j++) {
 			amount = amount_neighbours(conways_data, j, i);
