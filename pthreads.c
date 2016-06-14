@@ -13,6 +13,12 @@ typedef struct _data {
 	int height;
 } data;
 
+typedef struct _params {
+	long thread_count;
+	long rank;
+	data * conways_data;
+} params;
+
 double rtclock() {
 	struct timezone Tzp;
 	struct timeval Tp;
@@ -41,7 +47,8 @@ int amount_neighbours(data * conways_data, int x, int y) {
 	return amount;
 }
 
-void interal_operate(data * conways_data, int begin_x, int end_x, int begin_y, int end_y) {
+void internal_operate(data * conways_data, int begin_x, int end_x,
+		int begin_y, int end_y) {
     int i, j, amount;
     for(i = begin_y; i < end_y; i++) {
 		for(j = begin_x; j < end_x; j++) {
@@ -62,19 +69,44 @@ void interal_operate(data * conways_data, int begin_x, int end_x, int begin_y, i
 	}
 }
 
+void * internal_pthread(void * thread_params) {
+	params * my_params = (params *) thread_params;
+	long my_height = my_params->conways_data->height /
+		my_params->thread_count;
+	long my_width = my_params->conways_data->width /
+		my_params->thread_count;
+
+	internal_operate(my_params->conways_data, my_params->rank * my_width,
+			(my_params->rank + 1) * my_width, my_params->rank * my_height,
+			(my_params->rank + 1) * my_height);
+
+	return NULL;
+}
+
 void operate(data * conways_data, int number_threads) {
-	/*pthread_t * pthreads;
-    pthreads = (pthread_t *) malloc(sizeof(pthread_t) * number_threads);
-    
-    for(i = 0; i < size; i++)
-        pthread_create(&pthreads[i], NULL, internal_pthread, (void *) (unsigned long int) n/size);
-    for(i = 0; i < size; i++)
-        pthread_join(pthreads[i], NULL);
-    free(pthreads);
+	pthread_t * pthreads;
+	pthreads = (pthread_t *) malloc(sizeof(pthread_t) * number_threads);
+	params * thread_params = (params *) malloc(sizeof(params) * number_threads);
+	int i;
+
+	for(i = 0; i < number_threads; i++) {
+		thread_params[i].thread_count = number_threads;
+		thread_params[i].rank = i;
+		thread_params[i].conways_data = conways_data;
+	}
+
+	for(i = 0; i < number_threads; i++)
+		pthread_create(&pthreads[i], NULL, internal_pthread,
+				(void *)&thread_params[i]);
+	for(i = 0; i < number_threads; i++)
+		pthread_join(pthreads[i], NULL);
+
+	free(pthreads);
+	free(thread_params);
 
 	char * temp = conways_data->values; //swap buffers
 	conways_data->values = conways_data->next_values;
-	conways_data->next_values = temp;*/
+	conways_data->next_values = temp;
 	return;
 }
 

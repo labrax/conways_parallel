@@ -27,4 +27,4 @@ cuda: cuda.cu
 	$(CUDA_CC) $(FLAGS) cuda.c -o cuda
 
 clean:
-	rm serial openmp openmp_tasks pthreads cuda
+	rm -f serial openmp openmp_tasks pthreads cuda
