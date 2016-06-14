@@ -1,4 +1,4 @@
-#!env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -21,14 +21,16 @@ def exec_program(prog_name, test_input, test_output):
 
 
 def test_all():
-    test_files = os.listdir()
+    test_files = os.listdir('.')
     exec_files = os.listdir("..")
+    configured_execs = ["openmp", "openmp_tasks", "pthreads", "serial", "cuda"]
     
     for ef in exec_files:
-        if ef.endswith('out'):
-            for tf in test_files:
-                if 'in' in tf:
-                    exec_program("../" + ef, tf, tf[:-3] + '_' + ef[:-4] + '.out')
+        if ef not in configured_execs:
+            continue
+        for tf in test_files:
+            if 'in' in tf:
+                exec_program("../" + ef, tf, tf[:-3] + '_' + ef + '.out')
     
     
 if __name__ == "__main__":

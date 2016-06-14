@@ -1,2 +1,7 @@
 *~
 *.out
+openmp
+openmp_tasks
+pthreads
+serial
+cuda

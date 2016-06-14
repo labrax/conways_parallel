@@ -12,19 +12,19 @@ all: serial openmp openmp_tasks pthreads cuda
 	echo 'ready'
 	
 serial: serial.c
-	$(CC) $(FLAGS) serial.c -o serial.out
+	$(CC) $(FLAGS) serial.c -o serial
 
 openmp: openmp.c
-	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp.c -o openmp.out
+	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp.c -o openmp
 
 openmp_tasks: openmp_tasks.c
-	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp_tasks.c -o openmp_tasks.out
+	$(CC) $(FLAGS) $(OPENMP_FLAGS) openmp_tasks.c -o openmp_tasks
 
 pthreads:
-	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads.out
+	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads
 
 cuda: cuda.cu
-	$(CUDA_CC) $(FLAGS) cuda.c -o cuda.out
+	$(CUDA_CC) $(FLAGS) cuda.c -o cuda
 
 clean:
-	rm *.out
+	rm serial openmp openmp_tasks pthreads cuda
