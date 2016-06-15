@@ -45,20 +45,20 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
 	int index_j = blockDim.y * blockIdx.y + threadIdx.y;
 
 	int index = index_i*width + index_j;
-	if (index_i < linhas && index_j < colunas && index < linhas*colunas) {
-        amount = amount_neighbours(source, index_j, index_i, width, height);
-        if(source[index] == '1') {
-            if(amount < 2 || amount > 3)
-                goal[index] = '0';
-            else
-                goal[index] = '1';
-        }
-        else {
-            if(amount == 3)
-                goal[index] = '1';
-            else
-                goal[index] = '0';
-        }
+	if (index_i < height && index_j < width && index < height*width) {
+		int amount = amount_neighbours(source, index_j, index_i, width, height);
+		if(source[index] == '1') {
+		    if(amount < 2 || amount > 3)
+			goal[index] = '0';
+		    else
+			goal[index] = '1';
+		}
+		else {
+		    if(amount == 3)
+			goal[index] = '1';
+		    else
+			goal[index] = '0';
+		}
             
 	}
 }
@@ -66,9 +66,15 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
 void run_n_times(data * conways_data, int iterations, int number_threads) {
     int i;
     
+	char * d_A, * d_B;
+
+printf("antes de alocar memória\n");
     int size = conways_data->height * conways_data->width * sizeof(char);
+printf("%d\n", size);
 	cudaMalloc((void**) &d_A, size);
+printf("alocou a\n");
 	cudaMalloc((void**) &d_B, size);
+	printf("memória alocada\n");
     
     cudaMemcpy(d_A, conways_data->values, size, cudaMemcpyHostToDevice);
     
@@ -76,12 +82,22 @@ void run_n_times(data * conways_data, int iterations, int number_threads) {
 	dim3 numBlocks(ceil(conways_data->width/(float) threadsPerBlock.x), ceil(conways_data->height/(float) threadsPerBlock.y));
     
 	for(i = 0; i < iterations; i++) {
-		operate(conways_data, number_threads);
-        operate<<<numBlocks, threadsPerBlock>>>(i%0 == 0?d_A : d_B, i%0 == 0?d_B : d_A, conways_data->width, conways_data->height);
-        cudaThreadSynchronize();
+		printf("iteration: %d\n", i);
+		char * first, * second;
+		if(i%2 == 0) {
+			first = d_A;
+			second = d_B;
+		}
+		else {
+			first = d_B;
+			second = d_A;
+		}
+
+		operate<<<numBlocks, threadsPerBlock>>>(first, second, conways_data->width, conways_data->height);
+		cudaThreadSynchronize();
     }
     
-    cudaMemcpy(i%0 == 0? d_A : d_B, conways_data->values, size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(i%2 == 0? d_A : d_B, conways_data->values, size, cudaMemcpyDeviceToHost);
     
     cudaFree(d_A);
 	cudaFree(d_B);
