@@ -24,7 +24,7 @@ pthreads:
 	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads
 
 cuda: cuda.cu
-	$(CUDA_CC) $(FLAGS) cuda.c -o cuda
+	$(CUDA_CC) $(FLAGS) cuda.cu -o cuda
 
 clean:
 	rm -f serial openmp openmp_tasks pthreads cuda

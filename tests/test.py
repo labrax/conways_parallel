@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 
+import sys
 import os
 import subprocess
 from time import time
@@ -12,6 +13,11 @@ import difflib
 test_files = os.listdir('.')
 exec_files = os.listdir("..")
 configured_execs = ["openmp", "openmp_tasks", "pthreads", "serial", "cuda"]
+
+def make():
+    p = subprocess.Popen(['/usr/bin/make', '-C', '..'])
+    p.wait()
+
 
 def exec_program(prog_name, test_input, test_output):
     _input = open(test_input, 'r')
@@ -26,12 +32,19 @@ def exec_program(prog_name, test_input, test_output):
 
 
 def test_all():
+    global exec_files
+    prog_run = 0
     for ef in exec_files:
         if ef not in configured_execs:
             continue
+        prog_run += 1
         for tf in test_files:
             if 'in' in tf:
                 exec_program("../" + ef, tf, tf[:-3] + '_' + ef + '.out')
+    if prog_run == 0:
+        make()
+        exec_files = os.listdir("..")
+        test_all()
 
 
 # based on: http://stackoverflow.com/questions/19120489/compare-two-files-report-difference-in-python
@@ -55,11 +68,17 @@ def check_diff():
                     else:
                         print(line)
                 print("######")
-        
 
 
-    
-    
 if __name__ == "__main__":
-    #test_all()
-    check_diff()
+    if '-r' in sys.argv:
+        test_all()
+    if '-c' in sys.argv:
+        try:
+            check_diff()
+        except:
+            test_all()
+            check_diff()
+    if len(sys.argv) == 1 or ('-r' not in sys.argv and '-c' not in sys.argv):
+        print("Options are -r to run tests and -c to compare")
+        
