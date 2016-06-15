@@ -13,12 +13,6 @@ typedef struct _data {
 	int height;
 } data;
 
-typedef struct _params {
-	long thread_count;
-	long rank;
-	data * conways_data;
-} params;
-
 double rtclock() {
 	struct timezone Tzp;
 	struct timeval Tp;
@@ -47,8 +41,19 @@ int amount_neighbours(data * conways_data, int x, int y) {
 	return amount;
 }
 
-void internal_operate(data * conways_data, int begin_x, int end_x,
-		int begin_y, int end_y) {
+void internal_operate(void * run_data) {
+    struct _block {
+        int begin_x, end_x, begin_y, end_y;
+        data * conways_data;
+    };
+    
+    struct _block * run_block = (struct _block *) run_data;
+    
+    data * conways_data = run_block->conways_data;
+    int begin_x = run_block->begin_x;
+    int end_x = run_block->end_x;
+    int begin_y = run_block->begin_y;
+    int end_y = run_block->end_y;
     int i, j, amount;
     for(i = begin_y; i < end_y; i++) {
 		for(j = begin_x; j < end_x; j++) {
@@ -85,24 +90,31 @@ void * internal_pthread(void * thread_params) {
 
 void operate(data * conways_data, int number_threads) {
 	pthread_t * pthreads;
-	pthreads = (pthread_t *) malloc(sizeof(pthread_t) * number_threads);
-	params * thread_params = (params *) malloc(sizeof(params) * number_threads);
-	int i;
+    pthreads = (pthread_t *) malloc(sizeof(pthread_t) * number_threads);
+    
+    struct _block {
+        int begin_x, end_x, begin_y, end_y;
+        data * conways_data;
+    };
+    
+    int i;
+    struct _block * thread_data = (struct _block *) malloc(sizeof(struct _block) * number_threads);
+    for(i = 0; i < number_threads; i++) {
+        thread_data[i].conways_data = conways_data;
+        thread_data[i].begin_x = (conways_data->width/number_threads)*i;
+        thread_data[i].end_x = (conways_data->width/number_threads)*i+1;
 
-	for(i = 0; i < number_threads; i++) {
-		thread_params[i].thread_count = number_threads;
-		thread_params[i].rank = i;
-		thread_params[i].conways_data = conways_data;
-	}
-
-	for(i = 0; i < number_threads; i++)
-		pthread_create(&pthreads[i], NULL, internal_pthread,
-				(void *)&thread_params[i]);
-	for(i = 0; i < number_threads; i++)
-		pthread_join(pthreads[i], NULL);
-
-	free(pthreads);
-	free(thread_params);
+        thread_data[i].begin_y = (conways_data->height/number_threads)*i;
+        thread_data[i].end_y = (conways_data->height/number_threads)*i+1;
+        pthread_create(&pthreads[i], NULL, &internal_operate, (void *) (&thread_data[i]));
+    }
+    /*TODO: arrumar os blocos para terem algum tamanho específico*/
+        
+    for(i = 0; i < number_threads; i++)
+        pthread_join(pthreads[i], NULL);
+    
+    free(thread_data);
+    free(pthreads);
 
 	char * temp = conways_data->values; //swap buffers
 	conways_data->values = conways_data->next_values;
