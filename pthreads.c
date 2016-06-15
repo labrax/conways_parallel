@@ -73,11 +73,9 @@ void * internal_pthread(void * thread_params) {
 	params * my_params = (params *) thread_params;
 	long my_height = my_params->conways_data->height /
 		my_params->thread_count;
-	long my_width = my_params->conways_data->width /
-		my_params->thread_count;
 
-	internal_operate(my_params->conways_data, my_params->rank * my_width,
-			(my_params->rank + 1) * my_width, my_params->rank * my_height,
+	internal_operate(my_params->conways_data, 0, my_params->conways_data->width,
+            my_params->rank * my_height,
 			(my_params->rank + 1) * my_height);
 
 	return NULL;
