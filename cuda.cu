@@ -68,13 +68,9 @@ void run_n_times(data * conways_data, int iterations, int number_threads) {
     
     char * d_A, * d_B;
 
-    printf("antes de alocar memória\n");
     int size = conways_data->height * conways_data->width * sizeof(char);
-    printf("%d\n", size);
     cudaMalloc((void**) &d_A, size);
-    printf("alocou a\n");
     cudaMalloc((void**) &d_B, size);
-    printf("memória alocada\n");
     
     cudaMemcpy(d_A, conways_data->values, size, cudaMemcpyHostToDevice);
     
@@ -82,7 +78,6 @@ void run_n_times(data * conways_data, int iterations, int number_threads) {
     dim3 numBlocks(ceil(conways_data->width/(float) threadsPerBlock.x), ceil(conways_data->height/(float) threadsPerBlock.y));
     
     for(i = 0; i < iterations; i++) {
-        printf("iteration: %d\n", i);
         char * first, * second;
         if(i%2 == 0) {
             first = d_A;

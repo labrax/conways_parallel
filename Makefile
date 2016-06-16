@@ -9,7 +9,7 @@ OPENMP_FLAGS = -fopenmp
 PTHREADS_FLAGS = -pthread -lpthread
 
 all: serial openmp openmp_tasks pthreads cuda
-	echo 'ready'
+	@echo 'ready'
 	
 serial: serial.c
 	$(CC) $(FLAGS) serial.c -o serial
@@ -24,7 +24,10 @@ pthreads:
 	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads
 
 cuda: cuda.cu
-	$(CUDA_CC) $(FLAGS) cuda.cu -o cuda
+	$(CUDA_CC) cuda.cu -o cuda
+
+run: all
+	@(cd tests;  ./test.py -r -c)
 
 clean:
 	rm -f serial openmp openmp_tasks pthreads cuda
