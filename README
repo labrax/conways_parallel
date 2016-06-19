@@ -1,0 +1,24 @@
++ Arquivos de entrada:
+
+A entrada de todas as versões implementadas do Jogo da Vida são as mesmas.
+O formato é texto puro e há duas versões. Se o define SEED estiver sendo usado,
+a geração inicial é criada pseudo-aleatoriamente a partir de uma semente passada
+à função srand. Nesse caso, a entrada fica assim:
+
+<Tamanho da dimensão X do grid> <Tamanho da dimensão Y do grid> <Número de
+threads> <Semente para a função srand> <Quantidade de iterações>
+
+A outra versão é se o define SEED não estiver sendo usado. Nesse caso, deve-se
+entrar com todos os valores do grid, para cada célula. São dois valores
+possíveis para cada célula (0, se estiver morta; 1, se estiver viva) e são
+<Tamanho da dimensão X do grid> vezes <Tamanho da dimensão Y do grid> células. A
+entrada fica assim:
+
+<Tamanho da dimensão X do grid> <Tamanho da dimensão Y do grid> <Número de
+threads> <Valor da célula (0,0)> <Valor da célula (0,1)> <Valor da célula (0,2)>
+... <Valor da célula (X-1,Y-1)> <Quantidade de iterações>
+
++ Saída:
+
+A saída é gerada no stdout e representa o grid após todas as iterações terem
+sido processadas.
