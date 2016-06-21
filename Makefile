@@ -3,7 +3,7 @@ CUDA_CC = /usr/local/cuda-7.5/bin/nvcc
 
 DEBUG_FLAGS = -Wall -Wextra -lm -g
 RELEASE_FLAGS = -Wall -Wextra -lm -O3
-FLAGS = $(DEBUG_FLAGS)
+FLAGS = $(RELEASE_FLAGS)
 
 OPENMP_FLAGS = -fopenmp
 PTHREADS_FLAGS = -pthread -lpthread
