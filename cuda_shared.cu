@@ -42,12 +42,20 @@ __device__ int amount_neighbours(char * source, int x, int y, int width, int hei
 }
 
 __global__ void  operate(char * source, char * goal, int width, int height) {
+    __shared__ char local[2*BLOCK_SIZE+2*BLOCK_SIZE+4];
     int index_i = blockDim.x * blockIdx.x + threadIdx.x;
     int index_j = blockDim.y * blockIdx.y + threadIdx.y;
+    int i, j;
 
     int index = index_i*width + index_j;
+
+    local[threadIdx.y * BLOCK_SIZE + threadIdx.x] = source[index];
+
+    __syncthreads();
+
     if (index_i < height && index_j < width && index < height*width) {
-        int amount = amount_neighbours(source, index_j, index_i, width, height);
+        int amount = amount_neighbours(local, threadIdx.y, threadIdx.x,
+                BLOCK_SIZE, BLOCK_SIZE);
         if(source[index] == '1') {
             if(amount < 2 || amount > 3)
             goal[index] = '0';
