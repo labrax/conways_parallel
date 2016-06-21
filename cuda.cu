@@ -78,21 +78,11 @@ void run_n_times(data * conways_data, int iterations, int number_threads) {
     dim3 numBlocks(ceil(conways_data->width/(float) threadsPerBlock.x), ceil(conways_data->height/(float) threadsPerBlock.y));
     
     for(i = 0; i < iterations; i++) {
-        char * first, * second;
-        if(i%2 == 0) {
-            first = d_A;
-            second = d_B;
-        }
-        else {
-            first = d_B;
-            second = d_A;
-        }
-
-        operate<<<numBlocks, threadsPerBlock>>>(first, second, conways_data->width, conways_data->height);
+        operate<<<numBlocks, threadsPerBlock>>>(i%2 == 0? d_A : d_B, i%2 == 0? d_B : d_A, conways_data->width, conways_data->height);
         cudaThreadSynchronize();
     }
     
-    cudaMemcpy(i%2 == 0? d_A : d_B, conways_data->values, size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(conways_data->values, i%2 == 0? d_A : d_B, size, cudaMemcpyDeviceToHost);
     
     cudaFree(d_A);
     cudaFree(d_B);
