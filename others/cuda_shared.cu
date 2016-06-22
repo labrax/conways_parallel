@@ -129,6 +129,34 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
         }
     }
 
+    /* Mapeamento da borda superior */
+    else if(threadIdx.y == 0) {
+        if((index - width) >= 0 && (index - width) < width*height) {
+            local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+    }
+
+    /* Mapeamento da borda esquerda */
+    else if(threadIdx.x == 0) {
+        if((index - 1) >= 0 && (index - 1) < width*height) {
+            local[local_index - 1] = source[index - 1];
+        }
+    }
+
+    /* Mapeamento da borda direita */
+    else if(threadIdx.x == BLOCK_SIZE-1) {
+        if((index + 1) >= 0 && (index + 1) < width*height) {
+            local[local_index + 1] = source[index + 1];
+        }
+    }
+
+    /* Mapeamento da borda inferior */
+    else if(threadIdx.y == BLOCK_SIZE-1) {
+        if((index + width) >= 0 && (index + width) < width*height) {
+            local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+    }
+
     __syncthreads();
 
     if (index_i < height && index_j < width && index < height*width) {
