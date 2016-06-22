@@ -42,10 +42,9 @@ __device__ int amount_neighbours(char * source, int x, int y, int width, int hei
 }
 
 __global__ void  operate(char * source, char * goal, int width, int height) {
-    __shared__ char local[pow(BLOCK_SIZE+2, 2)];
+    __shared__ char local[(BLOCK_SIZE+2)*(BLOCK_SIZE+2)];
     int index_i = blockDim.x * blockIdx.x + threadIdx.x;
     int index_j = blockDim.y * blockIdx.y + threadIdx.y;
-    int i, j;
 
     int index = index_i*width + index_j;
     int local_index = BLOCK_SIZE + 2*(threadIdx.y+1) + 1 +
