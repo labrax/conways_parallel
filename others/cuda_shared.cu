@@ -42,14 +42,93 @@ __device__ int amount_neighbours(char * source, int x, int y, int width, int hei
 }
 
 __global__ void  operate(char * source, char * goal, int width, int height) {
-    __shared__ char local[2*BLOCK_SIZE+2*BLOCK_SIZE+4];
+    __shared__ char local[pow(BLOCK_SIZE+2, 2)];
     int index_i = blockDim.x * blockIdx.x + threadIdx.x;
     int index_j = blockDim.y * blockIdx.y + threadIdx.y;
     int i, j;
 
     int index = index_i*width + index_j;
+    int local_index = BLOCK_SIZE + 2*(threadIdx.y+1) + 1 +
+        threadIdx.y*BLOCK_SIZE + threadIdx.x;
 
-    local[threadIdx.y * BLOCK_SIZE + threadIdx.x] = source[index];
+    /* Mapeamento um-pra-um dos elementos */
+    local[local_index] = source[index];
+
+    /* Mapeamento do canto superior esquerdo */
+    if(threadIdx.x == 0 && threadIdx.y == 0) {
+
+        /* Elemento da diagonal superior esquerda */
+        if((index - width - 1) >= 0 && (index - width - 1) < width*height) {
+            local[local_index - (BLOCK_SIZE+2) - 1] = source[index - width - 1];
+        }
+
+        /* Elemento acima */
+        if((index - width) >= 0 && (index - width) < width*height) {
+            local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+
+        /* Elemento do lado esquerdo */
+        if((index - 1) >= 0 && (index - 1) < width*height) {
+            local[local_index - 1] = source[index - 1];
+        }
+    }
+
+    /* Mapeamento do canto superior direito */
+    else if(threadIdx.x == BLOCK_SIZE-1 && threadIdx.y == 0) {
+
+        /* Elemento da diagonal superior direita */
+        if((index - width + 1) >= 0 && (index - width + 1) < width*height) {
+            local[local_index - (BLOCK_SIZE+2) + 1] = source[index - width + 1];
+        }
+
+        /* Elemento acima */
+        if((index - width) >= 0 && (index - width) < width*height) {
+            local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+
+        /* Elemento do lado direito */
+        if((index + 1) >= 0 && (index + 1) < width*height) {
+            local[local_index + 1] = source[index + 1];
+        }
+    }
+
+    /* Mapeamento do canto inferior esquerdo */
+    else if(threadIdx.x == 0 && threadIdx.y == BLOCK_SIZE-1) {
+
+        /* Elemento da diagonal inferior esquerda */
+        if((index + width - 1) >= 0 && (index + width - 1) < width*height) {
+            local[local_index + (BLOCK_SIZE+2) - 1] = source[index + width - 1];
+        }
+
+        /* Elemento abaixo */
+        if((index + width) >= 0 && (index + width) < width*height) {
+            local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+
+        /* Elemento do lado esquerdo */
+        if((index - 1) >= 0 && (index - 1) < width*height) {
+            local[local_index - 1] = source[index - 1];
+        }
+    }
+
+    /* Mapeamento do canto inferior direito */
+    else if(threadIdx.x == BLOCK_SIZE-1 && threadIdx.y == BLOCK_SIZE-1) {
+
+        /* Elemento da diagonal inferior direita */
+        if((index + width + 1) >= 0 && (index + width + 1) < width*height) {
+            local[local_index + (BLOCK_SIZE+2) + 1] = source[index + width + 1];
+        }
+
+        /* Elemento abaixo */
+        if((index + width) >= 0 && (index + width) < width*height) {
+            local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+
+        /* Elemento do lado direito */
+        if((index + 1) >= 0 && (index + 1) < width*height) {
+            local[local_index + 1] = source[index + 1];
+        }
+    }
 
     __syncthreads();
 
