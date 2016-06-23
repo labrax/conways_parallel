@@ -46,29 +46,45 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
     int index_i = blockDim.x * blockIdx.x + threadIdx.x;
     int index_j = blockDim.y * blockIdx.y + threadIdx.y;
 
-    int index = index_i*width + index_j;
-    int local_index = BLOCK_SIZE + 2*(threadIdx.y+1) + 1 +
-        threadIdx.y*BLOCK_SIZE + threadIdx.x;
+    int index = index_j*width + index_i;
+    int local_index = (threadIdx.y+1)*(BLOCK_SIZE+2)+(threadIdx.x+1);
 
     /* Mapeamento um-pra-um dos elementos */
-    local[local_index] = source[index];
+    if(index_i < width && index_j < height && index < width*height) {
+        local[local_index] = source[index];
+    }
+    else {
+        local[local_index] = 0;
+    }
 
     /* Mapeamento do canto superior esquerdo */
     if(threadIdx.x == 0 && threadIdx.y == 0) {
 
         /* Elemento da diagonal superior esquerda */
-        if((index - width - 1) >= 0 && (index - width - 1) < width*height) {
+        if(index_i < width && index_j < height && (index - width - 1) >= 0 &&
+                (index - width - 1) < width*height && index%width) {
             local[local_index - (BLOCK_SIZE+2) - 1] = source[index - width - 1];
+        }
+        else {
+            local[local_index - (BLOCK_SIZE+2) - 1] = 0;
         }
 
         /* Elemento acima */
-        if((index - width) >= 0 && (index - width) < width*height) {
+        if(index_i < width && index_j < height && (index - width) >= 0 &&
+                (index - width) < width*height) {
             local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+        else {
+            local[local_index - (BLOCK_SIZE+2)] = 0;
         }
 
         /* Elemento do lado esquerdo */
-        if((index - 1) >= 0 && (index - 1) < width*height) {
+        if(index_i < width && index_j < height && (index - 1) >= 0 &&
+                (index - 1) < width*height && index%width) {
             local[local_index - 1] = source[index - 1];
+        }
+        else {
+            local[local_index - 1] = 0;
         }
     }
 
@@ -76,18 +92,30 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
     else if(threadIdx.x == BLOCK_SIZE-1 && threadIdx.y == 0) {
 
         /* Elemento da diagonal superior direita */
-        if((index - width + 1) >= 0 && (index - width + 1) < width*height) {
+        if(index_i < width && index_j < height && (index - width + 1) >= 0 &&
+                (index - width + 1) < width*height && (index+1)%width) {
             local[local_index - (BLOCK_SIZE+2) + 1] = source[index - width + 1];
+        }
+        else {
+            local[local_index - (BLOCK_SIZE+2) + 1] = 0;
         }
 
         /* Elemento acima */
-        if((index - width) >= 0 && (index - width) < width*height) {
+        if(index_i < width && index_j < height && (index - width) >= 0 &&
+                (index - width) < width*height) {
             local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+        else {
+            local[local_index - (BLOCK_SIZE+2)] = 0;
         }
 
         /* Elemento do lado direito */
-        if((index + 1) >= 0 && (index + 1) < width*height) {
+        if(index_i < width && index_j < height && (index + 1) >= 0 &&
+                (index + 1) < width*height && (index+1)%width) {
             local[local_index + 1] = source[index + 1];
+        }
+        else {
+            local[local_index + 1] = 0;
         }
     }
 
@@ -95,18 +123,30 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
     else if(threadIdx.x == 0 && threadIdx.y == BLOCK_SIZE-1) {
 
         /* Elemento da diagonal inferior esquerda */
-        if((index + width - 1) >= 0 && (index + width - 1) < width*height) {
+        if(index_i < width && index_j < height && (index + width - 1) >= 0 &&
+                (index + width - 1) < width*height && index%width) {
             local[local_index + (BLOCK_SIZE+2) - 1] = source[index + width - 1];
+        }
+        else {
+            local[local_index + (BLOCK_SIZE+2) - 1] = 0;
         }
 
         /* Elemento abaixo */
-        if((index + width) >= 0 && (index + width) < width*height) {
+        if(index_i < width && index_j < height && (index + width) >= 0 &&
+                (index + width) < width*height) {
             local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+        else {
+            local[local_index + (BLOCK_SIZE+2)] = 0;
         }
 
         /* Elemento do lado esquerdo */
-        if((index - 1) >= 0 && (index - 1) < width*height) {
+        if(index_i < width && index_j < height && (index - 1) >= 0 &&
+                (index - 1) < width*height && index%width) {
             local[local_index - 1] = source[index - 1];
+        }
+        else {
+            local[local_index - 1] = 0;
         }
     }
 
@@ -114,55 +154,83 @@ __global__ void  operate(char * source, char * goal, int width, int height) {
     else if(threadIdx.x == BLOCK_SIZE-1 && threadIdx.y == BLOCK_SIZE-1) {
 
         /* Elemento da diagonal inferior direita */
-        if((index + width + 1) >= 0 && (index + width + 1) < width*height) {
+        if(index_i < width && index_j < height && (index + width + 1) >= 0 &&
+                (index + width + 1) < width*height && (index+1)%width) {
             local[local_index + (BLOCK_SIZE+2) + 1] = source[index + width + 1];
+        }
+        else {
+            local[local_index + (BLOCK_SIZE+2) + 1] = 0;
         }
 
         /* Elemento abaixo */
-        if((index + width) >= 0 && (index + width) < width*height) {
+        if(index_i < width && index_j < height && (index + width) >= 0 &&
+                (index + width) < width*height) {
             local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+        else {
+            local[local_index + (BLOCK_SIZE+2)] = 0;
         }
 
         /* Elemento do lado direito */
-        if((index + 1) >= 0 && (index + 1) < width*height) {
+        if(index_i < width && index_j < height && (index + 1) >= 0 &&
+                (index + 1) < width*height && (index+1)%width) {
             local[local_index + 1] = source[index + 1];
+        }
+        else {
+            local[local_index + 1] = 0;
         }
     }
 
     /* Mapeamento da borda superior */
     else if(threadIdx.y == 0) {
-        if((index - width) >= 0 && (index - width) < width*height) {
+        if(index_i < width && index_j < height && (index - width) >= 0 &&
+                (index - width) < width*height) {
             local[local_index - (BLOCK_SIZE+2)] = source[index - width];
+        }
+        else {
+            local[local_index - (BLOCK_SIZE+2)] = 0;
         }
     }
 
     /* Mapeamento da borda esquerda */
     else if(threadIdx.x == 0) {
-        if((index - 1) >= 0 && (index - 1) < width*height) {
+        if(index_i < width && index_j < height && (index - 1) >= 0 &&
+                (index - 1) < width*height && index%width) {
             local[local_index - 1] = source[index - 1];
+        }
+        else {
+            local[local_index - 1] = 0;
         }
     }
 
     /* Mapeamento da borda direita */
     else if(threadIdx.x == BLOCK_SIZE-1) {
-        if((index + 1) >= 0 && (index + 1) < width*height) {
+        if(index_i < width && index_j < height && (index + 1) >= 0 &&
+                (index + 1) < width*height && (index+1)%width) {
             local[local_index + 1] = source[index + 1];
+        }
+        else {
+            local[local_index + 1] = 0;
         }
     }
 
     /* Mapeamento da borda inferior */
     else if(threadIdx.y == BLOCK_SIZE-1) {
-        if((index + width) >= 0 && (index + width) < width*height) {
+        if(index_i < width && index_j < height && (index + width) >= 0 &&
+                (index + width) < width*height) {
             local[local_index + (BLOCK_SIZE+2)] = source[index + width];
+        }
+        else {
+            local[local_index + (BLOCK_SIZE+2)] = 0;
         }
     }
 
     __syncthreads();
 
-    if (index_i < height && index_j < width && index < height*width) {
-        int amount = amount_neighbours(local, threadIdx.y, threadIdx.x,
-                BLOCK_SIZE, BLOCK_SIZE);
-        if(source[index] == '1') {
+    if (index_j < height && index_i < width && index < height*width) {
+        int amount = amount_neighbours(local, threadIdx.x+1, threadIdx.y+1,
+                BLOCK_SIZE+2, BLOCK_SIZE+2);
+        if(local[local_index] == '1') {
             if(amount < 2 || amount > 3)
             goal[index] = '0';
             else
