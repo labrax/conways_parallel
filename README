@@ -20,5 +20,5 @@ threads> <Valor da célula (0,0)> <Valor da célula (0,1)> <Valor da célula (0,
 
 + Saída:
 
-A saída é gerada no stdout e representa o grid após todas as iterações terem
-sido processadas.
+A saída é gerada no stdout contém o grid após todas as iterações terem
+sido processadas e o tempo de processamento.

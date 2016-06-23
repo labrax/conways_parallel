@@ -11,8 +11,33 @@ import difflib
 
 
 test_files = os.listdir('.')
+test_files.sort()
 exec_files = os.listdir("..")
+exec_files.sort()
+
+if "serial" not in exec_files:
+    print("serial executable has not been found - stopping execution")
+else:
+    exec_files.remove("serial")
+    # adiciona no começo da lista de execução
+    exec_files.insert(0, "serial")
+
 configured_execs = ["openmp", "openmp_tasks", "pthreads", "serial", "cuda"]
+
+
+resultados_de_todos = dict()
+
+def print_begin(prog_name):
+    print("")
+    print("-" * 5 + prog_name[3:] + "-" * 5)
+
+
+def print_end(prog_name, arq_teste, time):
+    print("Time elapsed: " + str(time) + "s")
+    if prog_name != "../serial":
+        print("Speedup: " + str(resultados_de_todos['../serial'][arq_teste]/time))
+    print("")
+
 
 def make():
     p = subprocess.Popen(['/usr/bin/make', '-C', '..'])
@@ -22,13 +47,17 @@ def make():
 def exec_program(prog_name, test_input, test_output):
     _input = open(test_input, 'r')
     _output = open(test_output, 'w')
+    print_begin(prog_name)
     start = time()
     p = subprocess.Popen([prog_name], stdin=_input, stdout=_output)
     p.wait()
     end = time()
     _input.close()
     _output.close()
-    print(prog_name, test_input, test_output, end-start)
+    _data = resultados_de_todos.get(prog_name, dict())
+    _data[test_input] = end-start
+    resultados_de_todos[prog_name] = _data
+    print_end(prog_name, test_input, end-start)
 
 
 def test_all():

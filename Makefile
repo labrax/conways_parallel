@@ -29,6 +29,9 @@ cuda: cuda.cu
 	$(CUDA_CC) cuda.cu -o cuda
 
 run: all
+	@(cd input; ./test.py -r)
+
+compare: all
 	@(cd input; ./test.py -r -c)
 
 clean:

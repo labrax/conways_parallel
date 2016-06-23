@@ -30,7 +30,18 @@ def gen_size_range():
         _size = (i+1)*1000
         gen_test(_size, _size, _threads, 0, _iterations, 'arq_' + str(_index) + '.in')
         _index += 1
+        
+def gen_min_test():
+    _index = 5000
+    _iterations = 50
+    _threads = 4
+    for i in range(9):
+        _size = (i+1)*4
+        gen_test(_size, _size, _threads, 0, _iterations, 'arq_' + str(_index) + '.in')
+        _index += 1
 
 if __name__ == '__main__':
-    gen_threads_range()
-    gen_size_range()
+    #gen_iterations_range()
+    #gen_threads_range()
+    #gen_size_range()
+    gen_min_test()
