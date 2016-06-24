@@ -26,7 +26,9 @@ pthreads:
 	$(CC) $(FLAGS) $(PTHREADS_FLAGS) pthreads.c -o pthreads
 
 cuda: cuda.cu
+ifneq ("$(wildcard $(CUDA_CC))", "")
 	$(CUDA_CC) cuda.cu -o cuda
+endif
 
 run: all
 	@(cd input; ./test.py -r)

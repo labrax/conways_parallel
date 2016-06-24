@@ -19,6 +19,16 @@ typedef struct _params {
     data * conways_data;
 } params;
 
+void input_error() {
+    fprintf(stderr, "Erro na leitura dos parâmetros");
+    exit(EXIT_FAILURE);
+}
+
+void mem_error() {
+    fprintf(stderr, "Erro na alocação de memória");
+    exit(EXIT_FAILURE);
+}
+
 double rtclock() {
     struct timezone Tzp;
     struct timeval Tp;
@@ -129,14 +139,22 @@ void print_data(data * conways_data) {
 int main(void) {
     int w, h, number_threads, seed;
     data conways_data;
-    scanf(" %d %d %d", &w, &h, &number_threads);
+    if(scanf(" %d %d %d", &w, &h, &number_threads) != 3) {
+        input_error();
+    }
     conways_data.width = w;
     conways_data.height = h;
     conways_data.values = (char *) malloc(sizeof(char) * w * h);
     conways_data.next_values = (char *) malloc(sizeof(char) * w * h);
 
+    if(conways_data.values == NULL || conways_data.next_values == NULL) {
+        mem_error();
+    }
+
     #ifdef SEED
-    scanf(" %d", &seed);
+    if(scanf(" %d", &seed) != 1) {
+        input_error();
+    }
     srand(seed);
     #endif
     
@@ -146,13 +164,17 @@ int main(void) {
             #ifdef SEED
             conways_data.values[i * w + j] = '0' + rand() % 2;
             #else
-            scanf(" %c", &conways_data.values[i * w + j]);
+            if(scanf(" %c", &conways_data.values[i * w + j]) != 1) {
+                input_error();
+            }
             #endif
         }
     }
 
     int iterations;
-    scanf(" %d", &iterations);
+    if(scanf(" %d", &iterations) != 1) {
+        input_error();
+    }
 
     double start, end;
     start = rtclock();
