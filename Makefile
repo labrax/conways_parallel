@@ -10,7 +10,7 @@ PTHREADS_FLAGS = -pthread -lpthread
 
 .PHONY: all run clean
 
-all: serial openmp openmp_tasks pthreads cuda
+all: serial openmp openmp_tasks pthreads cuda cuda_shared
 	@echo 'ready'
 	
 serial: serial.c
@@ -30,6 +30,11 @@ ifneq ("$(wildcard $(CUDA_CC))", "")
 	$(CUDA_CC) cuda.cu -o cuda
 endif
 
+cuda_shared: cuda_shared.cu
+ifneq ("$(wildcard $(CUDA_CC))", "")
+	$(CUDA_CC) cuda_shared.cu -o cuda_shared
+endif
+
 run: all
 	@(cd input; ./test.py -r)
 
@@ -37,4 +42,4 @@ compare: all
 	@(cd input; ./test.py -r -c)
 
 clean:
-	rm -f serial openmp openmp_tasks pthreads cuda
+	rm -f serial openmp openmp_tasks pthreads cuda cuda_shared

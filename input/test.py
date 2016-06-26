@@ -15,27 +15,32 @@ test_files.sort()
 exec_files = os.listdir("..")
 exec_files.sort()
 
+speedup = True
+
 if "serial" not in exec_files:
-    print("serial executable has not been found - stopping execution")
+    print("serial executable has not been found - ignoring speedup")
+    global speedup
+    speedup = False
 else:
     exec_files.remove("serial")
     # adiciona no começo da lista de execução
     exec_files.insert(0, "serial")
 
-configured_execs = ["openmp", "openmp_tasks", "pthreads", "serial", "cuda"]
+configured_execs = ["openmp", "openmp_tasks", "pthreads", "serial", "cuda", "cuda_shared"]
 
 
 resultados_de_todos = dict()
 
-def print_begin(prog_name):
+def print_begin(prog_name, arq_teste):
     print("")
-    print("-" * 5 + prog_name[3:] + "-" * 5)
+    print("-" * 5 + prog_name[3:] + " " + arq_teste + "-" * 5)
 
 
 def print_end(prog_name, arq_teste, time):
     print("Time elapsed: " + str(time) + "s")
-    if prog_name != "../serial":
-        print("Speedup: " + str(resultados_de_todos['../serial'][arq_teste]/time))
+    if speedup:
+        if prog_name != "../serial":
+            print("Speedup: " + str(resultados_de_todos['../serial'][arq_teste]/time))
     print("")
 
 
@@ -47,7 +52,7 @@ def make():
 def exec_program(prog_name, test_input, test_output):
     _input = open(test_input, 'r')
     _output = open(test_output, 'w')
-    print_begin(prog_name)
+    print_begin(prog_name, test_input)
     start = time()
     p = subprocess.Popen([prog_name], stdin=_input, stdout=_output)
     p.wait()
