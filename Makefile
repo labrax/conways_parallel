@@ -28,6 +28,9 @@ pthreads:
 cuda: cuda.cu
 ifneq ("$(wildcard $(CUDA_CC))", "")
 	$(CUDA_CC) cuda.cu -o cuda
+else
+	@echo 'Warning: nvcc not found! '
+	@echo -e 'Skipping CUDA versions\n'
 endif
 
 cuda_shared: cuda_shared.cu
