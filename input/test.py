@@ -19,7 +19,6 @@ speedup = True
 
 if "serial" not in exec_files:
     print("serial executable has not been found - ignoring speedup")
-    global speedup
     speedup = False
 else:
     exec_files.remove("serial")
@@ -94,13 +93,24 @@ def check_diff():
                 _f_other = open(tf[:-3] + '_' + ef + '.out', 'r')
                 other_data = _f_other.read().strip().splitlines()
                 _f_other.close()
+                last = ""
+                pre_last = ""
+                count = 0
                 print("###", 'serial', ef, tf, "###")
                 for line in difflib.unified_diff(serial_data, other_data, fromfile='serial', tofile=tf[:-3], lineterm='', n=0):
                     for prefix in ('---', '+++', '@@'):
                         if line.startswith(prefix):
                             break
                     else:
-                        print(line)
+                        pre_last = last
+                        last = line
+                        count += 1
+                        #print(line)
+                count = count / 2
+                if count > 0:
+                    print("{} lines differ:\n{}\n{}".format(count, pre_last, last))
+                else:
+                    print("files are equal")
                 print("######")
 
 
